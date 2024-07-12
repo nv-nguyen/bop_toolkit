@@ -242,7 +242,13 @@ def calc_pose_detection_scores(scene_ids, obj_ids, matches, errs, n_top, do_prin
     scene_recalls, scene_precisions = {}, {}
     for i in scene_ids:
         scene_recalls[i] = calc_recall(scene_tps[i], scene_tars[i])
-        scene_precisions[i] = scene_tps[i] / (scene_tps[i] + scene_fps[i])
+        # To handle scenes having no detection:
+        if scene_tps[i] + scene_fps[i] > 0:
+            scene_precisions[i] = scene_tps[i] / (scene_tps[i] + scene_fps[i])
+        else:
+            misc.log("Warning: No detection found for scene {i}")
+            scene_precisions[i] = 0
+            
     mean_scene_recall = float(np.mean(list(scene_recalls.values())).squeeze())
     mean_scene_precision = float(np.mean(list(scene_precisions.values())).squeeze())
 
